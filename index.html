@@ -20,7 +20,16 @@
     <link href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" rel="stylesheet" />
     <!-- moment.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-  </head>
+</head>
+<style>
+  #mesTable tr:hover {
+    background-color:aqua;
+    cursor: pointer;
+  }
+  #mesLogTable tr:hover {
+    background-color: #5e72e4;
+  }
+</style>
 <body>
     <div class="d-flex flex-wrap">
       <div class="col-12">
@@ -44,11 +53,11 @@
   let csvRFQLogData;
   let mesTable;
   let mesLogTable;
-  let setting = {
+  let setting1 = {
     columns : [
+      { title: "RFQ_MASTER_ID", data: "RFQ_MASTER_ID" },
       { title: "Product&nbsp;Family", data: "PRODUCT_FAMILY" },
       { title: "Receive&nbsp;Date", data: "RECEIVE_DATE" },
-      { title: "RFQ&nbsp;Status", data: "RFQ_STATUS" },
       { title: "Est&nbsp;Prod&nbsp;Revenue", data: "EST_PROD_REVENUE" },
       { title: "Est&nbsp;Sales&nbsp;Qty", data: "EST_SALES_QTY" },
       { title: "Est&nbsp;Prod&nbsp;Cost", data: "EST_PROD_COST" },
@@ -59,34 +68,100 @@
       { title: "FCS&nbsp;Date", data: "FCS_DATE" },
       { title: "Life&nbsp;Cycle", data: "LIFE_CYCLE" },
       { title: "End&nbsp;Date", data: "END_DATE" },
-      // { title: "LOST_REASON_CODE", data: "LOST_REASON_CODE" },
-      // { title: "LOST_REASON_DESC", data: "LOST_REASON_DESC" },
+      { title: "RFQ&nbsp;Status", data: "RFQ_STATUS" },
+      { title: "Lost&nbsp;Reason&nbsp;Code", data: "LOST_REASON_CODE" },
+      { title: "Lost&nbsp;Reason&nbsp;Desc", data: "LOST_REASON_DESC" },
       { title: "Editor", data: "EDITOR" },
       { title: "Cdt", data: "CDT" },
       { title: "Udt", data: "UDT" },
     ],
+    columnDefs: [
+      // {
+      //   targets: [0],
+      //   visible: false,
+      // }
+    ],
     scrollX: 255,
-    lengthMenu: [10, 25, 50, 100],
+    scrollY: 350,
+    onRowClick : null,
+  };
+
+  let setting2 = {
+    columns : [
+    { title: "RFQ_MASTER_ID", data: "RFQ_MASTER_ID" },
+    { title: "Action&nbsp;Name", data: "ACTION_NAME" },
+    { title: "Receive&nbsp;Date", data: "RECEIVE_DATE" },
+    { title: "Product&nbsp;Family", data: "PRODUCT_FAMILY" },
+    { title: "Old&nbsp;Product&nbsp;Family", data: "OLD_PRODUCT_FAMILY" },
+    { title: "Est&nbsp;Prod&nbsp;Revenue", data: "EST_PROD_REVENUE" },
+    { title: "Est&nbsp;Sales&nbsp;Qty", data: "EST_SALES_QTY" },
+    { title: "Est&nbsp;Prod&nbsp;Cost", data: "EST_PROD_COST" },
+    { title: "DB&nbsp;Date", data: "DB_DATE" },
+    { title: "SI&nbsp;Date", data: "SI_DATE" },
+    { title: "PV&nbsp;Date", data: "PV_DATE" },
+    { title: "RTM&nbsp;Date", data: "RTM_DATE" },
+    { title: "FCS&nbsp;Date", data: "FCS_DATE" },
+    { title: "Life&nbsp;Cycle", data: "LIFE_CYCLE" },
+    { title: "End&nbsp;Date", data: "END_DATE" },
+    { title: "Receive&nbsp;Date", data: "RFQ_STATUS" },
+    { title: "Lost&nbsp;Reason&nbsp;Code", data: "LOST_REASON_CODE" },
+    { title: "Lost&nbsp;Reason&nbsp;Desc", data: "LOST_REASON_DESC" },
+    { title: "Editor", data: "EDITOR" },
+    { title: "Cdt", data: "CDT" },
+    ],
+    scrollX: 255,
+    scrollY: 350,
   }
   
   $(document).ready(function(){
 
     $("#btnGetcsv").click(function(){
-      init();
+      initmesTable();
+      // initmesLogTable();
     });
 
+    
+    $("#mesTable").on( "click", "tr", function() {
+      let tr = $(this);
+      if(tr.hasClass("selected")){
+        tr.removeClass("selected");
+      }else{
+        $("tbody").find("tr.selected").removeClass("selected");
+        tr.addClass("selected");
+      };
+      
+      var id = $(this)[0].firstChild.innerHTML;
+      // console.log(id);
+      
+      function initmesLogTable(){
+        if(mesLogTable){
+          mesLogTable.destroy();
+          $("#mesLogTable").empty();
+        }
+        
+        mesLogTable = $("#mesLogTable").DataTable(setting2);
+        csvRFQLogData2 = $.grep(csvRFQLogData, function(n, i){
+          return n.RFQ_MASTER_ID == id;
+        })
+        // console.log(csvRFQLogData2);
+        mesLogTable.rows.add(csvRFQLogData2).draw();
+      }
+      initmesLogTable();
+    });
 
   });
 
-  function init(){
+  function initmesTable(){
     if(mesTable){
       mesTable.destroy();
       $("#mesTable").empty();
     }
 
-    mesTable = $("#mesTable").DataTable(setting);
+    mesTable = $("#mesTable").DataTable(setting1);
     mesTable.rows.add(csvRFQData).draw();
   }
+
+
 </script>
 <script src="./mes.js"></script>
 
