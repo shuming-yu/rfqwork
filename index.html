@@ -49,13 +49,16 @@
 <script>
   let csvRFQ = "RFQMaster.csv";
   let csvRFQLog = "RFQMasterLog.csv";
-  let csvRFQData;
-  let csvRFQLogData;
+  let csvRFQData = [];
+  let csvRFQLogData = [];
   let mesTable;
   let mesLogTable;
-  let setting1 = {
+  let rowIndex;
+  let rfqId;
+
+  let mesTableSetting = {
     columns : [
-      { title: "RFQ_MASTER_ID", data: "RFQ_MASTER_ID" },
+      { title: "RFQ_MASTER_ID", data: "RFQ_MASTER_ID", visible: false },
       { title: "Product&nbsp;Family", data: "PRODUCT_FAMILY" },
       { title: "Receive&nbsp;Date", data: "RECEIVE_DATE" },
       { title: "Est&nbsp;Prod&nbsp;Revenue", data: "EST_PROD_REVENUE" },
@@ -75,39 +78,32 @@
       { title: "Cdt", data: "CDT" },
       { title: "Udt", data: "UDT" },
     ],
-    columnDefs: [
-      // {
-      //   targets: [0],
-      //   visible: false,
-      // }
-    ],
     scrollX: 255,
     scrollY: 350,
-    onRowClick : null,
   };
 
-  let setting2 = {
+  let mesLogTableSetting = {
     columns : [
-    { title: "RFQ_MASTER_ID", data: "RFQ_MASTER_ID" },
-    { title: "Action&nbsp;Name", data: "ACTION_NAME" },
-    { title: "Receive&nbsp;Date", data: "RECEIVE_DATE" },
-    { title: "Product&nbsp;Family", data: "PRODUCT_FAMILY" },
-    { title: "Old&nbsp;Product&nbsp;Family", data: "OLD_PRODUCT_FAMILY" },
-    { title: "Est&nbsp;Prod&nbsp;Revenue", data: "EST_PROD_REVENUE" },
-    { title: "Est&nbsp;Sales&nbsp;Qty", data: "EST_SALES_QTY" },
-    { title: "Est&nbsp;Prod&nbsp;Cost", data: "EST_PROD_COST" },
-    { title: "DB&nbsp;Date", data: "DB_DATE" },
-    { title: "SI&nbsp;Date", data: "SI_DATE" },
-    { title: "PV&nbsp;Date", data: "PV_DATE" },
-    { title: "RTM&nbsp;Date", data: "RTM_DATE" },
-    { title: "FCS&nbsp;Date", data: "FCS_DATE" },
-    { title: "Life&nbsp;Cycle", data: "LIFE_CYCLE" },
-    { title: "End&nbsp;Date", data: "END_DATE" },
-    { title: "Receive&nbsp;Date", data: "RFQ_STATUS" },
-    { title: "Lost&nbsp;Reason&nbsp;Code", data: "LOST_REASON_CODE" },
-    { title: "Lost&nbsp;Reason&nbsp;Desc", data: "LOST_REASON_DESC" },
-    { title: "Editor", data: "EDITOR" },
-    { title: "Cdt", data: "CDT" },
+      { title: "RFQ_MASTER_ID", data: "RFQ_MASTER_ID", visible: false },
+      { title: "Action&nbsp;Name", data: "ACTION_NAME" },
+      { title: "Receive&nbsp;Date", data: "RECEIVE_DATE" },
+      { title: "Product&nbsp;Family", data: "PRODUCT_FAMILY" },
+      { title: "Old&nbsp;Product&nbsp;Family", data: "OLD_PRODUCT_FAMILY" },
+      { title: "Est&nbsp;Prod&nbsp;Revenue", data: "EST_PROD_REVENUE" },
+      { title: "Est&nbsp;Sales&nbsp;Qty", data: "EST_SALES_QTY" },
+      { title: "Est&nbsp;Prod&nbsp;Cost", data: "EST_PROD_COST" },
+      { title: "DB&nbsp;Date", data: "DB_DATE" },
+      { title: "SI&nbsp;Date", data: "SI_DATE" },
+      { title: "PV&nbsp;Date", data: "PV_DATE" },
+      { title: "RTM&nbsp;Date", data: "RTM_DATE" },
+      { title: "FCS&nbsp;Date", data: "FCS_DATE" },
+      { title: "Life&nbsp;Cycle", data: "LIFE_CYCLE" },
+      { title: "End&nbsp;Date", data: "END_DATE" },
+      { title: "Receive&nbsp;Date", data: "RFQ_STATUS" },
+      { title: "Lost&nbsp;Reason&nbsp;Code", data: "LOST_REASON_CODE" },
+      { title: "Lost&nbsp;Reason&nbsp;Desc", data: "LOST_REASON_DESC" },
+      { title: "Editor", data: "EDITOR" },
+      { title: "Cdt", data: "CDT" },
     ],
     scrollX: 255,
     scrollY: 350,
@@ -117,6 +113,7 @@
 
     $("#btnGetcsv").click(function(){
       initmesTable();
+      // $(this).prop('disabled', true);
       // initmesLogTable();
     });
 
@@ -126,41 +123,47 @@
       if(tr.hasClass("selected")){
         tr.removeClass("selected");
       }else{
-        $("tbody").find("tr.selected").removeClass("selected");
+        $("#mesTable tbody").find("tr.selected").removeClass("selected");
         tr.addClass("selected");
       };
       
-      var id = $(this)[0].firstChild.innerHTML;
-      // console.log(id);
-      
-      function initmesLogTable(){
-        if(mesLogTable){
-          mesLogTable.destroy();
-          $("#mesLogTable").empty();
-        }
-        
-        mesLogTable = $("#mesLogTable").DataTable(setting2);
-        csvRFQLogData2 = $.grep(csvRFQLogData, function(n, i){
-          return n.RFQ_MASTER_ID == id;
-        })
-        // console.log(csvRFQLogData2);
-        mesLogTable.rows.add(csvRFQLogData2).draw();
-      }
+      // 取出出點選 id 值
+      rowIndex = $("#mesTable tr").index(tr.closest("tr"));
+      // console.log(rowIndex);
+      rfqId = $("#mesTable").DataTable().row(rowIndex-1).data().RFQ_MASTER_ID;
+      // console.log(rfqId);
       initmesLogTable();
+
+      // 取出出點選 id 值 - DOM
+      // var id = $(this)[0].firstChild.innerHTML;
     });
 
   });
 
+  
   function initmesTable(){
-    if(mesTable){
-      mesTable.destroy();
-      $("#mesTable").empty();
+    if(!mesTable){
+      // mesTable.destroy();
+      // $("#mesTable").empty();
+      mesTable = $("#mesTable").DataTable(mesTableSetting);
     }
-
-    mesTable = $("#mesTable").DataTable(setting1);
-    mesTable.rows.add(csvRFQData).draw();
+    // mesTable.clear();
+    mesTable.clear().rows.add(csvRFQData).draw();
   }
 
+  // 使用 id 篩選相對應 RFQ_MASTER_ID
+  function initmesLogTable(){
+  if(!mesLogTable){
+    // mesLogTable.destroy();
+    // $("#mesLogTable").empty();
+    mesLogTable = $("#mesLogTable").DataTable(mesLogTableSetting);
+  }
+  let csvRFQLogGreq = $.grep(csvRFQLogData, function(item, i){
+    return item.RFQ_MASTER_ID == rfqId;
+  })
+  // console.log(csvRFQLogGreq);
+  mesLogTable.clear().rows.add(csvRFQLogGreq).draw();
+}
 
 </script>
 <script src="./mes.js"></script>
